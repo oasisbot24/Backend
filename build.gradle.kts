@@ -26,6 +26,7 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("mysql:mysql-connector-java")
+	implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
 }
 
 tasks.withType<Test> {
