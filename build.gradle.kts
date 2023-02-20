@@ -25,6 +25,7 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("mysql:mysql-connector-java")
 }
 
 tasks.withType<Test> {
