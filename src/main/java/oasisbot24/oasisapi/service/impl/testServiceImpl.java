@@ -14,10 +14,10 @@ public class testServiceImpl implements testService {
 
         Map<String, Object> testData = new HashMap<>();
 
-        testData.put("label1", "check1");
-        testData.put("label2", "check2");
-        testData.put("label3", "check3");
-        testData.put("label4", "check4");
+        testData.put("label1", "Hello!");
+        testData.put("label2", "This is");
+        testData.put("label3", "Oasis");
+        testData.put("label4", "test API response!!!");
 
         return testData;
     }
