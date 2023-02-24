@@ -13,7 +13,7 @@ public class oasisController {
 
     private final testService testService;
 
-    @GetMapping("/test")
+    @GetMapping("/api/test")
     public Map<String, Object> testController() {
         return testService.getTestData();
     }
