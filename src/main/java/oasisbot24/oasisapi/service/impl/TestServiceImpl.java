@@ -1,13 +1,13 @@
 package oasisbot24.oasisapi.service.impl;
 
-import oasisbot24.oasisapi.service.testService;
+import oasisbot24.oasisapi.service.TestService;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class testServiceImpl implements testService {
+public class TestServiceImpl implements TestService {
 
     @Override
     public Map<String, Object> getTestData() {
