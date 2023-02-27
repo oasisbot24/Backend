@@ -26,6 +26,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-websocket")
 	implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5")
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("io.jsonwebtoken:jjwt:0.11.5")
 	implementation("mysql:mysql-connector-java")
 	implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
