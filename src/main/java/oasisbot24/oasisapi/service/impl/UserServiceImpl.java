@@ -1,7 +1,9 @@
 package oasisbot24.oasisapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import oasisbot24.oasisapi.domain.EmailVerification;
 import oasisbot24.oasisapi.domain.Member;
+import oasisbot24.oasisapi.repository.EmailVerificationRepository;
 import oasisbot24.oasisapi.repository.MemberRepository;
 import oasisbot24.oasisapi.service.EmailVerificationService;
 import oasisbot24.oasisapi.service.UserService;
@@ -19,6 +21,7 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
 
     private final MemberRepository memberRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
     private final EmailVerificationService emailVerificationService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -33,6 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void signUpUser(Map<String, Object> payload) {
         Member member = new Member();
+        EmailVerification emailVerification = new EmailVerification();
 
         member.setEmail(payload.get("email").toString()); //프론트에서 이메일형식 체크
         member.setPassword(payload.get("password").toString());
@@ -52,6 +56,14 @@ public class UserServiceImpl implements UserService {
         //유저 이메일로 인증 메일 전송
         try {
             String Token = emailVerificationService.sendSimpleMessage(member.getEmail());
+
+            emailVerification.setUserId(member.getId());
+            emailVerification.setIssuedDate(LocalDateTime.now());
+            emailVerification.setEmailAddress(member.getEmail());
+            emailVerification.setToken(Token);
+            emailVerification.setIsVerified(Boolean.FALSE);
+
+            emailVerificationRepository.save(emailVerification);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
