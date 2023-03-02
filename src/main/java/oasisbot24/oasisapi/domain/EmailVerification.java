@@ -12,7 +12,7 @@ public class EmailVerification {
     private Long id;
 
     private Long userId;
-    private LocalDateTime expirationDate;
+    private LocalDateTime issuedDate;
     private String emailAddress;
     private String token;
     private Boolean isVerified;

@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Repository
 public class JdbcTemplateEmailVerificationRepository implements EmailVerificationRepository {
 
     private final JdbcTemplate jdbcTemplate;
@@ -27,7 +29,7 @@ public class JdbcTemplateEmailVerificationRepository implements EmailVerificatio
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("UserId", emailVerification.getUserId());
-        parameters.put("EmailVerificationExpirationDate", emailVerification.getExpirationDate());
+        parameters.put("EmailVerificationIssuedDate", emailVerification.getIssuedDate());
         parameters.put("EmailVerificationEmailAddress",emailVerification.getEmailAddress());
         parameters.put("EmailVerificationToken", emailVerification.getToken());
         parameters.put("EmailVerificationIsVerified", emailVerification.getIsVerified()?1:0);
@@ -54,7 +56,7 @@ public class JdbcTemplateEmailVerificationRepository implements EmailVerificatio
             EmailVerification emailVerification = new EmailVerification();
             emailVerification.setId(rs.getLong("EmailVerificationId"));
             emailVerification.setUserId(rs.getLong("UserId"));
-            emailVerification.setExpirationDate(rs.getTimestamp("EmailVerificationExpirationDate").toLocalDateTime());
+            emailVerification.setIssuedDate(rs.getTimestamp("EmailVerificationIssuedDate").toLocalDateTime());
             emailVerification.setEmailAddress(rs.getString("EmailVerificationEmailAddress"));
             emailVerification.setToken(rs.getString("EmailVerificationToken"));
             emailVerification.setIsVerified(rs.getInt("EmailVerificationIsVerified")==1?Boolean.TRUE:Boolean.FALSE);
