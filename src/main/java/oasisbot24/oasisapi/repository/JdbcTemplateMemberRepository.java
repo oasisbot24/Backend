@@ -47,7 +47,7 @@ public class JdbcTemplateMemberRepository implements MemberRepository{
 
     @Override
     public Optional<Member> findById(Long id) {
-        List<Member> result = jdbcTemplate.query("select * from User where UserId = ?", memberRowMapper());
+        List<Member> result = jdbcTemplate.query("select * from User where UserId = ?", memberRowMapper(), id);
         return result.stream().findAny();
     }
 
@@ -67,6 +67,15 @@ public class JdbcTemplateMemberRepository implements MemberRepository{
             Member member = new Member();
             member.setId(rs.getLong("UserId"));
             member.setEmail(rs.getString("UserEmail"));
+            member.setPassword(rs.getString("UserPassword"));
+            member.setCreateDate(rs.getTimestamp("UserCreateDate").toLocalDateTime());
+            member.setUpdateDate(rs.getTimestamp("UserUpdateDate").toLocalDateTime());
+            member.setPhone(rs.getString("UserPhone"));
+            member.setNickname(rs.getString("UserNickName"));
+            member.setPoint(rs.getLong("UserPoint"));
+            member.setCommissionRate(rs.getLong("UserCommissionRate"));
+            member.setNft(rs.getLong("UserNft"));
+            member.setType(rs.getInt("UserType"));
             return member;
         };
     }
