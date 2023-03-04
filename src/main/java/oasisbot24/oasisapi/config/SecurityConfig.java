@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/authenticate",
-                        "/","/api/v1/test","/api/v1/user",
+                        "/","/api/v1/test","/api/v1/user","/api/v1/signup*",
                         "/v2/api-docs",  "/configuration/ui",
                         "/swagger-resources/**", "/configuration/security",
                         "/swagger-ui/**", "/webjars/**","/swagger/**").permitAll()
