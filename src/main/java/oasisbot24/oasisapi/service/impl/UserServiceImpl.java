@@ -61,12 +61,12 @@ public class UserServiceImpl implements UserService {
 
         //유저 이메일로 인증 메일 전송
         try {
-            String Token = emailVerificationService.sendSimpleMessage(member.getEmail());
+            String token = emailVerificationService.sendSimpleMessage(member.getEmail());
 
             emailVerification.setUserId(member.getId());
             emailVerification.setIssuedDate(LocalDateTime.now());
             emailVerification.setEmailAddress(member.getEmail());
-            emailVerification.setToken(Token);
+            emailVerification.setToken(token);
             emailVerification.setIsVerified(Boolean.FALSE);
 
             emailVerificationRepository.save(emailVerification);
@@ -80,15 +80,24 @@ public class UserServiceImpl implements UserService {
         Optional<EmailVerification> emailVerificationRes = emailVerificationRepository.findByEmail(email);
 
         if(emailVerificationRes.isPresent()) {
+            String userEmail = emailVerificationRes.get().getEmailAddress();
+
             if(Objects.equals(emailVerificationRes.get().getToken(), auth)) {
                 LocalDateTime issuedDateTime = emailVerificationRes.get().getIssuedDate();
                 Duration duration = Duration.between(issuedDateTime, LocalDateTime.now());
 
                 if (duration.getSeconds() <= EXPIRATION_PERIOD) {
-                    memberRepository.updateUserTypeByEmailVerification(emailVerificationRes.get().getEmailAddress());
-                    emailVerificationRepository.updateEmailVerificationIsVerifiedByEmailVerification(emailVerificationRes.get().getEmailAddress());
+                    memberRepository.updateUserTypeByEmailVerification(userEmail);
+                    emailVerificationRepository.updateEmailVerificationIsVerifiedByEmailVerification(userEmail);
                 } else {
-                    log.info(email + " 사용자의 이메일 인증 토큰 기한이 만료되었습니다!");
+                    log.info(email + " 사용자의 이메일 인증 토큰 기한이 만료되었습니다! 새로운 인증 이메일을 발송합니다.");
+
+                    try {
+                        String token = emailVerificationService.sendSimpleMessage(userEmail);
+                        emailVerificationRepository.updateEmailVerificationToken(userEmail, token);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             } else {
                 log.info(email + "사용자의 이메일 인증 토큰 정보가 잘못되었습니다!");
