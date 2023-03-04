@@ -40,6 +40,11 @@ public class JdbcTemplateEmailVerificationRepository implements EmailVerificatio
     }
 
     @Override
+    public void updateEmailVerificationIsVerifiedByEmailVerification(String email) {
+        jdbcTemplate.update("update EmailVerification set EmailVerificationIsVerified = 1 where EmailVerificationEmailAddress = ?", email);
+    }
+
+    @Override
     public Optional<EmailVerification> findById(Long id) {
         List<EmailVerification> result = jdbcTemplate.query("select * from EmailVerification where EmailVerificationId = ?", emailVerificationRowMapper(), id);
         return result.stream().findAny();
@@ -47,7 +52,7 @@ public class JdbcTemplateEmailVerificationRepository implements EmailVerificatio
 
     @Override
     public Optional<EmailVerification> findByEmail(String email) {
-        List<EmailVerification> result = jdbcTemplate.query("select * from EmailVerification where EmailVerificationId = ?", emailVerificationRowMapper(), email);
+        List<EmailVerification> result = jdbcTemplate.query("select * from EmailVerification where EmailVerificationEmailAddress = ?", emailVerificationRowMapper(), email);
         return result.stream().findAny();
     }
 
