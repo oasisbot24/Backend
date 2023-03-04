@@ -46,6 +46,21 @@ public class JdbcTemplateMemberRepository implements MemberRepository{
     }
 
     @Override
+    public Member updateByAdmin(Member member) {
+        return null;
+    }
+
+    @Override
+    public Member updateByUser(String password, String phone, String nickName) {
+        return null;
+    }
+
+    @Override
+    public void updateUserTypeByEmailVerification(String email) {
+        jdbcTemplate.update("update User set UserType = 2 where UserEmail = ?", email);
+    }
+
+    @Override
     public Optional<Member> findById(Long id) {
         List<Member> result = jdbcTemplate.query("select * from User where UserId = ?", memberRowMapper(), id);
         return result.stream().findAny();
