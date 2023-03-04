@@ -9,6 +9,8 @@ public interface EmailVerificationRepository {
 
     void updateEmailVerificationIsVerifiedByEmailVerification(String email);
 
+    void updateEmailVerificationToken(String email, String auth);
+
     Optional<EmailVerification> findById(Long id);
 
     Optional<EmailVerification> findByEmail(String email);

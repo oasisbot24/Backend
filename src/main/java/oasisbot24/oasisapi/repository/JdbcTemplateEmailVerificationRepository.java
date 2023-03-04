@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,12 @@ public class JdbcTemplateEmailVerificationRepository implements EmailVerificatio
     @Override
     public void updateEmailVerificationIsVerifiedByEmailVerification(String email) {
         jdbcTemplate.update("update EmailVerification set EmailVerificationIsVerified = 1 where EmailVerificationEmailAddress = ?", email);
+    }
+
+    @Override
+    public void updateEmailVerificationToken(String email, String auth) {
+        jdbcTemplate.update("update EmailVerification set EmailVerificationToken = ? where EmailVerificationEmailAddress = ?", auth, email);
+        jdbcTemplate.update("update EmailVerification set EmailVerificationIssuedDate = ? where EmailVerificationEmailAddress = ?", LocalDateTime.now(), email);
     }
 
     @Override
