@@ -1,6 +1,7 @@
 package oasisbot24.oasisapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import oasisbot24.oasisapi.domain.EmailVerification;
 import oasisbot24.oasisapi.domain.Member;
 import oasisbot24.oasisapi.repository.EmailVerificationRepository;
@@ -11,11 +12,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -24,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailVerificationService emailVerificationService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    public static final int EXPIRATION_PERIOD = 2*24*60*60;
 
     @Override
     public Map<String, Object> getUserData() {
@@ -71,7 +77,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void emailVerification(String email, String auth) {
+        Optional<EmailVerification> emailVerificationRes = emailVerificationRepository.findByEmail(email);
 
+        if(emailVerificationRes.isPresent()) {
+            if(Objects.equals(emailVerificationRes.get().getToken(), auth)) {
+                LocalDateTime issuedDateTime = emailVerificationRes.get().getIssuedDate();
+                Duration duration = Duration.between(issuedDateTime, LocalDateTime.now());
+
+                if (duration.getSeconds() <= EXPIRATION_PERIOD) {
+                    memberRepository.updateUserTypeByEmailVerification(emailVerificationRes.get().getEmailAddress());
+                    emailVerificationRepository.updateEmailVerificationIsVerifiedByEmailVerification(emailVerificationRes.get().getEmailAddress());
+                } else {
+                    log.info(email + " 사용자의 이메일 인증 토큰 기한이 만료되었습니다!");
+                }
+            } else {
+                log.info(email + "사용자의 이메일 인증 토큰 정보가 잘못되었습니다!");
+            }
+        } else {
+            log.info(email + "사용자의 이메일 인증 토큰 정보를 찾을 수 없습니다!");
+        }
     }
 
     private void validateDuplicateMember(Member member) {
