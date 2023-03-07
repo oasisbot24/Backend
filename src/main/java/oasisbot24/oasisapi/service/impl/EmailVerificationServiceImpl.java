@@ -1,5 +1,6 @@
 package oasisbot24.oasisapi.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import oasisbot24.oasisapi.service.EmailVerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Autowired
@@ -24,8 +26,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private String fromEmail;
 
     private MimeMessage createMessage(String to)throws Exception{
-        System.out.println("보내는 대상 : " + to);
-        System.out.println("인증 번호 : " + authKey);
+        log.info("보내는 대상 : " + to);
+        log.info("인증 번호 : " + authKey);
         MimeMessage message = emailSender.createMimeMessage();
 
         message.addRecipients(RecipientType.TO, to);//보내는 대상
@@ -39,7 +41,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         msg += "<p align='center'>감사합니다.</p>";
         msg += "<br>";
         msg += "<div style='font-size:130%' align='center'>";
-        msg += "<a href=\"http://oasisbot24.com:8080/api/v1/signup?email=" + to + "&auth=" + authKey + "\" ";
+        msg += "<a href=\"http://oasisbot24.com/api/v1/signup?email=" + to + "&auth=" + authKey + "\" ";
         msg += "style='background-color: #405cf5;border-radius: 6px;color: #fff;";
         msg += "margin: 12px 0 0;padding: 10px 25px;position: relative;";
         msg += "text-align: center;width: auto;text-decoration: none;'>가입 완료</a>";
