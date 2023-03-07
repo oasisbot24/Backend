@@ -6,6 +6,7 @@ import oasisbot24.oasisapi.jwt.JwtAuthenticationEntryPoint;
 import oasisbot24.oasisapi.jwt.JwtSecurityConfig;
 import oasisbot24.oasisapi.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -56,6 +57,7 @@ public class SecurityConfig {
                 //HttpServletRequest를 사용하는 요청들에 대한 접근 제한 설정
                 .and()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                 .antMatchers("/authenticate",
                         "/","/api/v1/test","/api/v1/user","/api/v1/signup*",
                         "/v2/api-docs",  "/configuration/ui",
