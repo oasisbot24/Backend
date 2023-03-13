@@ -22,7 +22,6 @@ public class JwtFilter extends GenericFilterBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
     public static final String AUTHORIZATION_HEADER = "Authorization";
-
     private final TokenProvider tokenProvider;
 
     @Override
@@ -31,17 +30,17 @@ public class JwtFilter extends GenericFilterBean {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String jwt = resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
-        if(StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)){
+        if(StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
             Authentication authentication = tokenProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             LOGGER.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-        }else{
+        } else {
             LOGGER.info("유효한 JWT 토큰이 없습니다., uri: {}", requestURI);
         }
         chain.doFilter(httpServletRequest, response);
     }
 
-    /**토큰 정보 추출 */
+    //토큰 정보 추출
     private String resolveToken(HttpServletRequest request){
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){

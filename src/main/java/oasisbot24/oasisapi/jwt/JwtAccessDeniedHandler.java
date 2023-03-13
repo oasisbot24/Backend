@@ -16,7 +16,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtAccessDeniedHandler implements AccessDeniedHandler{
+public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
     private final Logger LOGGER = LoggerFactory.getLogger(JwtAccessDeniedHandler.class);
 
