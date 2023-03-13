@@ -2,12 +2,18 @@ package oasisbot24.oasisapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import oasisbot24.oasisapi.common.IsEmailDuplicated;
+import oasisbot24.oasisapi.common.MemberType;
+import oasisbot24.oasisapi.domain.EmailDupCheckVO;
 import oasisbot24.oasisapi.domain.EmailVerification;
 import oasisbot24.oasisapi.domain.Member;
 import oasisbot24.oasisapi.repository.EmailVerificationRepository;
 import oasisbot24.oasisapi.repository.MemberRepository;
 import oasisbot24.oasisapi.service.EmailVerificationService;
 import oasisbot24.oasisapi.service.UserService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +35,7 @@ public class UserServiceImpl implements UserService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailVerificationService emailVerificationService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    public static final int EXPIRATION_PERIOD = 2*24*60*60;
+    public static final int EMAIL_VERIFICATION_EXPIRATION_PERIOD = 2*24*60*60;
 
     @Override
     public Map<String, Object> getUserData() {
@@ -40,13 +46,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void signUpUser(Map<String, Object> payload) {
+    public ResponseEntity<EmailDupCheckVO> signUpUser(Map<String, Object> payload) {
         Member member = new Member();
         EmailVerification emailVerification = new EmailVerification();
+        HttpHeaders httpHeaders = new HttpHeaders();
 
         member.setEmail(payload.get("email").toString()); //프론트에서 이메일형식 체크
         member.setPassword(payload.get("password").toString());
         member.encodePassword(bCryptPasswordEncoder);
+        member.setPassword("{bcrypt}"+member.getPassword());
         member.setCreateDate(LocalDateTime.now());
         member.setUpdateDate(member.getCreateDate());
         member.setPhone(payload.get("phone").toString()); //프론트에서 대시 제거
@@ -54,9 +62,14 @@ public class UserServiceImpl implements UserService {
         member.setPoint(0L);
         member.setCommissionRate(10L);
         member.setNft(0L);
-        member.setType(0);
+        member.setType(MemberType.UNVERIFIED);
 
-        validateDuplicateMember(member);
+        try {
+            validateDuplicateMember(member);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new EmailDupCheckVO(IsEmailDuplicated.YES), httpHeaders, HttpStatus.EXPECTATION_FAILED);
+        }
+
         memberRepository.save(member);
 
         //유저 이메일로 인증 메일 전송
@@ -73,11 +86,14 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        return new ResponseEntity<>(new EmailDupCheckVO(IsEmailDuplicated.NO), httpHeaders, HttpStatus.OK);
     }
 
     @Override
-    public void emailVerification(String email, String auth) {
+    public String emailVerification(String email, String auth) {
         Optional<EmailVerification> emailVerificationRes = emailVerificationRepository.findByEmail(email);
+        String state;
 
         if(emailVerificationRes.isPresent()) {
             String userEmail = emailVerificationRes.get().getEmailAddress();
@@ -86,25 +102,31 @@ public class UserServiceImpl implements UserService {
                 LocalDateTime issuedDateTime = emailVerificationRes.get().getIssuedDate();
                 Duration duration = Duration.between(issuedDateTime, LocalDateTime.now());
 
-                if (duration.getSeconds() <= EXPIRATION_PERIOD) {
+                if (duration.getSeconds() <= EMAIL_VERIFICATION_EXPIRATION_PERIOD) {
                     memberRepository.updateUserTypeByEmailVerification(userEmail);
                     emailVerificationRepository.updateEmailVerificationIsVerifiedByEmailVerification(userEmail);
+                    state = "이메일 인증이 완료되었습니다!";
                 } else {
                     log.info(email + " 사용자의 이메일 인증 토큰 기한이 만료되었습니다! 새로운 인증 이메일을 발송합니다.");
 
                     try {
                         String token = emailVerificationService.sendSimpleMessage(userEmail);
                         emailVerificationRepository.updateEmailVerificationToken(userEmail, token);
+                        state = "사용자의 이메일 인증 토큰 기한이 만료되어 새로운 인증 이메일을 발송합니다.";
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 }
             } else {
                 log.info(email + "사용자의 이메일 인증 토큰 정보가 잘못되었습니다!");
+                state = "사용자의 이메일 인증 토큰 정보가 잘못되었습니다!";
             }
         } else {
             log.info(email + "사용자의 이메일 인증 토큰 정보를 찾을 수 없습니다!");
+            state = "사용자의 이메일 인증 토큰 정보를 찾을 수 없습니다!";
         }
+
+        return state;
     }
 
     private void validateDuplicateMember(Member member) {

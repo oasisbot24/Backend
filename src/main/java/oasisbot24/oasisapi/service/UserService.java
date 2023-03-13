@@ -1,11 +1,14 @@
 package oasisbot24.oasisapi.service;
 
+import oasisbot24.oasisapi.domain.EmailDupCheckVO;
+import org.springframework.http.ResponseEntity;
+
 import java.util.Map;
 
 public interface UserService {
     Map<String, Object> getUserData();
 
-    void signUpUser(Map<String, Object> payload);
+    ResponseEntity<EmailDupCheckVO> signUpUser(Map<String, Object> payload);
 
-    void emailVerification(String email, String auth);
+    String emailVerification(String email, String auth);
 }
