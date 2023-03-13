@@ -1,7 +1,9 @@
 package oasisbot24.oasisapi.service;
 
-import java.util.Map;
+import oasisbot24.oasisapi.domain.SignInVO;
+import oasisbot24.oasisapi.jwt.TokenDTO;
+import org.springframework.http.ResponseEntity;
 
 public interface SignInService {
-    Map<String, Object> signIn();
+    ResponseEntity<TokenDTO> signIn(SignInVO signInVO);
 }
