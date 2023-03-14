@@ -39,8 +39,9 @@ public class SignInServiceImpl implements SignInService {
         Optional<Member> member = memberRepository.findByEmail(signInVO.getEmail());
         HttpHeaders httpHeaders = new HttpHeaders();
 
+        //이메일 존재 여부 판단
         if(member.isEmpty()) {
-            return new ResponseEntity<>(new TokenDTO("", SignInResult.FAIL, SignInMsg.MISMATCH), httpHeaders, HttpStatus.OK);
+            return new ResponseEntity<>(new TokenDTO("", SignInResult.FAIL, SignInMsg.MISMATCH), httpHeaders, HttpStatus.EXPECTATION_FAILED);
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(signInVO.getEmail(), signInVO.getPassword());
@@ -53,7 +54,7 @@ public class SignInServiceImpl implements SignInService {
             try {
                 validateVerifiedMember(member);
             } catch (Exception e) {
-                return new ResponseEntity<>(new TokenDTO("", SignInResult.FAIL, SignInMsg.UNVERIFIED), httpHeaders, HttpStatus.OK);
+                return new ResponseEntity<>(new TokenDTO("", SignInResult.FAIL, SignInMsg.UNVERIFIED), httpHeaders, HttpStatus.EXPECTATION_FAILED);
             }
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -63,9 +64,9 @@ public class SignInServiceImpl implements SignInService {
 
             return new ResponseEntity<>(new TokenDTO(jwt, SignInResult.SUCCESS, SignInMsg.SUCCESS), httpHeaders, HttpStatus.OK);
         } catch (Exception e) {
-            //비밀번호가 틀렸을 때
+            //비밀번호 미일치
             log.info(member.get().getEmail() + " -> " + e.getMessage());
-            return new ResponseEntity<>(new TokenDTO("", SignInResult.FAIL, SignInMsg.MISMATCH), httpHeaders, HttpStatus.OK);
+            return new ResponseEntity<>(new TokenDTO("", SignInResult.FAIL, SignInMsg.MISMATCH), httpHeaders, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
